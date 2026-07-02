@@ -15,6 +15,7 @@ class _LoginPageState extends State<LoginPage> {
 
   bool _isLoading = false;
   bool _obscurePassword = true;
+  bool _isSignUpMode = false;
 
   @override
   void dispose() {
@@ -44,6 +45,58 @@ class _LoginPageState extends State<LoginPage> {
 
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Login successful')),
+      );
+    } on AuthException catch (error) {
+      if (!mounted) {
+        return;
+      }
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(error.message)),
+      );
+    } catch (_) {
+      if (!mounted) {
+        return;
+      }
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Something went wrong. Please try again.')),
+      );
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    }
+  }
+
+  Future<void> _signUp() async {
+    if (!(_formKey.currentState?.validate() ?? false)) {
+      return;
+    }
+
+    setState(() {
+      _isLoading = true;
+    });
+
+    try {
+      final response = await Supabase.instance.client.auth.signUp(
+        email: _emailController.text.trim(),
+        password: _passwordController.text,
+      );
+
+      if (!mounted) {
+        return;
+      }
+
+      final requiresEmailConfirmation = response.session == null;
+      final message = requiresEmailConfirmation
+          ? 'Account created. Check your email to confirm and then log in.'
+          : 'Account created and logged in.';
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(message)),
       );
     } on AuthException catch (error) {
       if (!mounted) {
@@ -171,7 +224,7 @@ class _LoginPageState extends State<LoginPage> {
                                 controller: _passwordController,
                                 obscureText: _obscurePassword,
                                 textInputAction: TextInputAction.done,
-                                onFieldSubmitted: (_) => _signIn(),
+                                onFieldSubmitted: (_) => _isSignUpMode ? _signUp() : _signIn(),
                                 decoration: InputDecoration(
                                   labelText: 'Password',
                                   suffixIcon: IconButton(
@@ -200,7 +253,7 @@ class _LoginPageState extends State<LoginPage> {
                                 width: double.infinity,
                                 height: 54,
                                 child: ElevatedButton(
-                                  onPressed: _isLoading ? null : _signIn,
+                                  onPressed: _isLoading ? null : (_isSignUpMode ? _signUp : _signIn),
                                   style: ElevatedButton.styleFrom(
                                     backgroundColor: const Color(0xFF3E414B),
                                     foregroundColor: Colors.white,
@@ -214,28 +267,35 @@ class _LoginPageState extends State<LoginPage> {
                                           width: 22,
                                           child: CircularProgressIndicator(strokeWidth: 2.4, color: Colors.white),
                                         )
-                                      : const Text(
-                                          'Log In',
+                                      : Text(
+                                          _isSignUpMode ? 'Create Account' : 'Log In',
                                           style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
                                         ),
                                 ),
                               ),
                               const SizedBox(height: 18),
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
+                              Wrap(
+                                alignment: WrapAlignment.center,
+                                crossAxisAlignment: WrapCrossAlignment.center,
                                 children: [
                                   Text(
-                                    'Don\'t have an account? ',
+                                    _isSignUpMode ? 'Already have an account? ' : 'Don\'t have an account? ',
                                     style: theme.textTheme.bodyMedium?.copyWith(color: const Color(0xFF8C92A0)),
                                   ),
                                   TextButton(
-                                    onPressed: () {},
+                                    onPressed: _isLoading
+                                        ? null
+                                        : () {
+                                            setState(() {
+                                              _isSignUpMode = !_isSignUpMode;
+                                            });
+                                          },
                                     style: TextButton.styleFrom(
                                       padding: EdgeInsets.zero,
                                       minimumSize: Size.zero,
                                       tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                                     ),
-                                    child: const Text('Sign Up'),
+                                    child: Text(_isSignUpMode ? 'Log In' : 'Sign Up'),
                                   ),
                                 ],
                               ),

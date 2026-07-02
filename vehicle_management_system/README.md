@@ -1,17 +1,32 @@
 # vehicle_management_system
 
-A new Flutter project.
+Flutter app for vehicle management with Supabase authentication.
 
-## Getting Started
+## Supabase Auth Setup
 
-This project is a starting point for a Flutter application.
+1. Create a Supabase project.
+2. In Supabase dashboard, go to Authentication and ensure Email provider is enabled.
+3. Copy `.env.example` to `.env`.
+4. Add your real values:
 
-A few resources to get you started if this is your first Flutter project:
+```env
+SUPABASE_URL=https://your-project-id.supabase.co
+SUPABASE_ANON_KEY=your-anon-key
+```
 
-- [Learn Flutter](https://docs.flutter.dev/get-started/learn-flutter)
-- [Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Flutter learning resources](https://docs.flutter.dev/reference/learning-resources)
+`.env` is ignored by git and loaded at app startup.
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+## Run
+
+```bash
+flutter pub get
+flutter run
+```
+
+## What Is Implemented
+
+- Supabase initialization from `.env`
+- Login with email/password
+- Sign up with email/password
+- Auth gate that routes to login or app content based on session
+- Sign out on authenticated home screen
