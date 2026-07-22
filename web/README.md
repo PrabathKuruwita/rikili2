@@ -261,6 +261,44 @@ suggests the policy isn't doing its job — fix the policy instead.
 
 ---
 
+## Contributing
+
+Nothing is committed straight to `main`. The flow is always the same:
+
+```bash
+git checkout main
+git pull                        # branch off current main, not a stale one
+git checkout -b vidur/booking-availability-rpc
+# ...work, commit as you go...
+git push -u origin vidur/booking-availability-rpc
+```
+
+Then open a PR into `main` on GitHub.
+
+**Branch names are `name/descriptor`** — your name, a slash, then what the
+branch does (`devini/signup-page`, `raj/reminder-sweep`). With several people
+working at once, the name tells everyone whose branch it is at a glance, and
+the descriptor saves them opening it to find out what it touches.
+
+Branch from up-to-date `main` every time. Branching off yesterday's `main`, or
+off another feature branch, is how you end up resolving conflicts that have
+nothing to do with your change.
+
+Commit as you work rather than squashing everything into one commit at the
+end — a reviewer can follow a series of small commits, and `git bisect` can
+only isolate a bug to the commit that caused it if the commits are small.
+
+Open the PR when the branch is ready for someone else to read. It does not
+have to be finished — a draft PR is a good way to ask whether an approach is
+right before building the rest of it.
+
+One thing specific to this repo: **SQL lives in `supabase/` at the repo root,
+not in `web/`**, so a branch that adds a migration touches files outside this
+directory. Make sure they are in the same PR. A migration merged without the
+frontend that depends on it is fine; the reverse is a broken `main`.
+
+---
+
 ## Not set up yet
 
 Deliberately left open, because they depend on decisions not yet made:
