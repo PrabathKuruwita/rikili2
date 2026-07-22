@@ -3,24 +3,19 @@ import { useAuth } from '@/features/auth/useAuth'
 import type { Role } from '@/features/auth/roles'
 
 const NAV: Record<Role, { to: string; label: string }[]> = {
-  owner: [
+  vehicle_owner: [
     { to: '/garage', label: 'My Vehicles' },
     { to: '/book', label: 'Book Service' },
     { to: '/bookings', label: 'Bookings' },
     { to: '/reminders', label: 'Reminders' },
   ],
-  mechanic: [
-    { to: '/station/jobs', label: 'Job Board' },
-    { to: '/station/bookings', label: 'Bookings' },
-  ],
-  station_manager: [
+  garage_owner: [
     { to: '/station', label: 'Dashboard' },
     { to: '/station/bookings', label: 'Bookings' },
     { to: '/station/jobs', label: 'Job Board' },
     { to: '/station/customers', label: 'Customers' },
     { to: '/station/reports', label: 'Reports' },
   ],
-  admin: [{ to: '/admin', label: 'Admin' }],
 }
 
 export function AppLayout() {

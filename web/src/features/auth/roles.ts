@@ -1,9 +1,12 @@
 /**
- * Rikili has two audiences (see the spec): vehicle owners, and the garage side.
- * We model the garage side as two distinct roles because they see different
- * screens — a mechanic logs work, a manager runs the station.
+ * Rikili has two audiences: vehicle owners, and the garage side.
+ *
+ * These values mirror the `user_role` enum in Postgres exactly — see
+ * supabase/migrations. Mechanics work under their garage owner's login rather
+ * than having accounts of their own, which is why there is no separate
+ * mechanic role: who did the work is recorded on the service record instead.
  */
-export const ROLES = ['owner', 'mechanic', 'station_manager', 'admin'] as const
+export const ROLES = ['vehicle_owner', 'garage_owner'] as const
 
 export type Role = (typeof ROLES)[number]
 
@@ -13,8 +16,6 @@ export function isRole(value: unknown): value is Role {
 
 /** Where each role lands after logging in. */
 export const HOME_ROUTE: Record<Role, string> = {
-  owner: '/garage',
-  mechanic: '/station/jobs',
-  station_manager: '/station',
-  admin: '/admin',
+  vehicle_owner: '/garage',
+  garage_owner: '/station',
 }

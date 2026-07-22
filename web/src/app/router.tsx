@@ -27,7 +27,7 @@ export const router = createBrowserRouter([
 
           // ---- Vehicle owner ----
           {
-            element: <RequireRole allow={['owner']} />,
+            element: <RequireRole allow={['vehicle_owner']} />,
             children: [
               { path: '/garage', element: <Placeholder title="My Vehicles" /> },
               { path: '/garage/:vehicleId', element: <Placeholder title="Vehicle Detail" /> },
@@ -43,30 +43,18 @@ export const router = createBrowserRouter([
           },
 
           // ---- Garage side ----
+          // One role covers the whole station: mechanics share the garage
+          // owner's login, so there is no mechanic/manager split to guard.
           {
-            element: <RequireRole allow={['mechanic', 'station_manager']} />,
+            element: <RequireRole allow={['garage_owner']} />,
             children: [
               { path: '/station', element: <Placeholder title="Station Dashboard" /> },
               { path: '/station/bookings', element: <Placeholder title="Booking Queue" /> },
               { path: '/station/jobs', element: <Placeholder title="Job Board" /> },
               { path: '/station/jobs/:jobId', element: <Placeholder title="Log Work Performed" /> },
               { path: '/station/customers', element: <Placeholder title="Customers" /> },
-            ],
-          },
-
-          // Manager-only: reporting and staff admin.
-          {
-            element: <RequireRole allow={['station_manager']} />,
-            children: [
               { path: '/station/reports', element: <Placeholder title="Reports" /> },
-              { path: '/station/staff', element: <Placeholder title="Staff" /> },
             ],
-          },
-
-          // ---- Platform admin ----
-          {
-            element: <RequireRole allow={['admin']} />,
-            children: [{ path: '/admin', element: <Placeholder title="Admin" /> }],
           },
 
           { path: '/settings', element: <Placeholder title="Settings" /> },
