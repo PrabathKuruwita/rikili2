@@ -11,7 +11,7 @@
     "typecheck": "tsc -b --noEmit",
     "format": "prettier --write \"src/**/*.{ts,tsx,css}\"",
     "format:check": "prettier --check \"src/**/*.{ts,tsx,css}\"",
-    "gen:types": "supabase gen types typescript --project-id $SUPABASE_PROJECT_ID > src/types/database.ts"
+    "gen:types": "dotenv -e .env.local -- sh -c 'supabase gen types typescript --db-url \"$SUPABASE_DB_URL\"' > src/types/database.ts"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.110.7",
@@ -26,8 +26,10 @@
     "@types/react": "^19.2.17",
     "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react": "^6.0.3",
+    "dotenv-cli": "^11.0.0",
     "oxlint": "^1.71.0",
     "prettier": "^3.9.6",
+    "supabase": "^2.109.1",
     "tailwindcss": "^4.3.3",
     "typescript": "~6.0.2",
     "vite": "^8.1.1"
