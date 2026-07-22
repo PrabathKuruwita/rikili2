@@ -62,6 +62,8 @@ password and must stay out of the bundle. Never rename it with one.
 | `pnpm lint`      | oxlint                                  |
 | `pnpm format`    | Prettier, writes in place               |
 | `pnpm gen:types` | Regenerate `src/types/database.ts`      |
+| `pnpm db:status` | Compare local migrations to the remote  |
+| `pnpm db:push`   | Apply pending migrations to the remote  |
 
 ---
 
@@ -74,18 +76,33 @@ supabase/migrations/   schema, RLS policies, triggers — apply in filename orde
 supabase/seed.sql      development data (safe to re-run)
 ```
 
-Two ways to apply them, and the choice has a consequence:
+The normal loop is: write a migration, `pnpm db:push`, then `pnpm gen:types`.
+`pnpm db:status` shows local vs remote. That file is generated — never
+hand-edit it.
 
-- **Studio SQL Editor** (`http://<host>:8010` → SQL Editor). Needs only the
-  dashboard login, no database password. But the Supabase CLI does not record
-  that it happened, so a later `supabase db push` would try to replay
-  everything and collide.
-- **`psql` with `SUPABASE_DB_URL`.** Scriptable and CLI-trackable. Use
-  `--single-transaction` so a failure rolls back instead of leaving the schema
-  half-applied.
+```bash
+pnpm db:status              # what's applied where
+pnpm db:push --dry-run      # what would run
+pnpm db:push                # apply
+pnpm gen:types              # resync TypeScript types
+```
 
-After any schema change, run `pnpm gen:types` to keep `src/types/database.ts`
-in step. That file is generated — never hand-edit it.
+Two things about this setup are non-obvious, and both cost time to rediscover:
+
+**The CLI insists on TLS; this server has none.** Postgres on the VM does not
+speak SSL at all, so the CLI fails with `server refused TLS connection`.
+`PGSSLMODE=disable` in `.env.local` is what makes every `supabase` command work
+— it is not optional here.
+
+**`supabase/` lives at the repo root, not in `web/`.** The scripts pass
+`--workdir ..` so the CLI finds it. Running `supabase` by hand from `web/` will
+not.
+
+You can also apply SQL through the **Studio SQL Editor** (`http://<host>:8010`),
+which needs only the dashboard login and no database password. It works, but the
+CLI has no way to know it happened, so the migration history silently drifts —
+which is exactly how this project ended up needing a `supabase migration repair`
+pass. Prefer `db:push`; if you do use Studio, repair the history afterwards.
 
 ### Seed accounts
 

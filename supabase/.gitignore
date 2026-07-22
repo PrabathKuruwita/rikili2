@@ -1,0 +1,6 @@
+# Supabase CLI scratch — local state, not project source.
+.branches
+.temp
+
+# Never commit connection strings or keys pulled down by the CLI.
+.env
