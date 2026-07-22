@@ -98,11 +98,27 @@ speak SSL at all, so the CLI fails with `server refused TLS connection`.
 `--workdir ..` so the CLI finds it. Running `supabase` by hand from `web/` will
 not.
 
-You can also apply SQL through the **Studio SQL Editor** (`http://<host>:8010`),
-which needs only the dashboard login and no database password. It works, but the
-CLI has no way to know it happened, so the migration history silently drifts —
-which is exactly how this project ended up needing a `supabase migration repair`
-pass. Prefer `db:push`; if you do use Studio, repair the history afterwards.
+### Apply migrations with `db:push`, not Studio
+
+You can also run SQL through the **Studio SQL Editor** (`http://<host>:8010`),
+which needs only the dashboard login and no database password. It works, and
+that is the problem: the CLI has no way to know it happened. This project
+already needed one `supabase migration repair` pass for exactly that reason —
+the schema was applied through Studio, so `supabase_migrations.schema_migrations`
+did not exist at all, and a `db push` would have replayed everything against
+tables that already existed.
+
+**`db:status` will not catch a repeat of this.** It compares version numbers
+between `supabase/migrations/` and the remote — not schema contents. Anything
+done in the SQL Editor leaves both sides reporting "up to date" while the
+database quietly diverges from the files that are supposed to describe it. The
+drift is invisible until something fails for an unrelated-looking reason.
+
+So: `db:push` is the only path that keeps history honest. Use the SQL Editor for
+reading data and one-off inspection. If you do change schema there — including
+`alter`s you think are too small to matter — write the equivalent migration file
+and run `supabase migration repair --status applied <version>` afterwards, or
+the next person to run `db:push` inherits the mess.
 
 ### Seed accounts
 
