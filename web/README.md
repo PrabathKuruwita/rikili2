@@ -1,9 +1,9 @@
 # Rikili — Web
 
-React + TypeScript + Vite frontend, backed by Supabase. Serves all user types:
-vehicle owners, mechanics, station managers, and platform admins.
+React + TypeScript + Vite frontend, backed by Supabase. Serves both user types:
+vehicle owners and garage owners.
 
-This is a **scaffold**. Auth and routing work; every feature screen is a
+Auth, routing, and the database schema work; every feature screen is still a
 placeholder waiting to be built.
 
 ---
@@ -13,18 +13,28 @@ placeholder waiting to be built.
 ```bash
 cd web
 pnpm install
-cp .env.example .env.local   # then fill in the two values — see below
+cp .env.example .env.local   # then fill in the values — see below
 pnpm dev                     # http://localhost:5173
 ```
 
 ### Environment variables
 
-Both come from **Supabase Dashboard → Project Settings → API**:
+This project points at a **self-hosted** Supabase instance, not supabase.com,
+so these come from the server's own `.env` (next to its `docker-compose.yml`) —
+there is no dashboard page to copy them from.
 
-| Variable                 | Where to find it                            |
-| ------------------------ | ------------------------------------------- |
-| `VITE_SUPABASE_URL`      | "Project URL"                               |
-| `VITE_SUPABASE_ANON_KEY` | "Project API keys" → `anon` / `publishable` |
+| Variable                 | What it is                                              |
+| ------------------------ | ------------------------------------------------------- |
+| `VITE_SUPABASE_URL`      | Kong gateway base URL, no trailing slash                 |
+| `VITE_SUPABASE_ANON_KEY` | Server's `ANON_KEY` (a `eyJ…` JWT with `"role":"anon"`)  |
+| `SUPABASE_DB_URL`        | Postgres connection — **`pnpm gen:types` only**          |
+
+`SUPABASE_DB_URL` has two gotchas worth knowing before you debug a failed
+connection. Port 5432 is the **Supavisor pooler**, not raw Postgres, so the
+username must be `postgres.<POOLER_TENANT_ID>` — a plain `postgres` fails with
+`no tenant identifier provided`. And the password must be URL-encoded (`@` →
+`%40`, `=` → `%3D`). It is `POSTGRES_PASSWORD` from the server's `.env`, which
+is **not** the Studio dashboard password.
 
 Two rules, and they matter:
 
@@ -34,6 +44,9 @@ Two rules, and they matter:
 2. **The `service_role` key never goes in this app.** It bypasses every
    security rule in the database. If a feature seems to need it, that feature
    belongs in an Edge Function, not the frontend.
+
+`SUPABASE_DB_URL` has no `VITE_` prefix on purpose — it holds the database
+password and must stay out of the bundle. Never rename it with one.
 
 `.env.local` is gitignored. Keep it that way.
 
@@ -49,6 +62,52 @@ Two rules, and they matter:
 | `pnpm lint`      | oxlint                                  |
 | `pnpm format`    | Prettier, writes in place               |
 | `pnpm gen:types` | Regenerate `src/types/database.ts`      |
+
+---
+
+## Database
+
+SQL lives in `supabase/` at the repo root, not in `web/`.
+
+```
+supabase/migrations/   schema, RLS policies, triggers — apply in filename order
+supabase/seed.sql      development data (safe to re-run)
+```
+
+Two ways to apply them, and the choice has a consequence:
+
+- **Studio SQL Editor** (`http://<host>:8010` → SQL Editor). Needs only the
+  dashboard login, no database password. But the Supabase CLI does not record
+  that it happened, so a later `supabase db push` would try to replay
+  everything and collide.
+- **`psql` with `SUPABASE_DB_URL`.** Scriptable and CLI-trackable. Use
+  `--single-transaction` so a failure rolls back instead of leaving the schema
+  half-applied.
+
+After any schema change, run `pnpm gen:types` to keep `src/types/database.ts`
+in step. That file is generated — never hand-edit it.
+
+### Seed accounts
+
+`supabase/seed.sql` deletes its own users first, so re-running it is safe. Every
+seed account uses the password **`rikili-dev-1234`**:
+
+| Email               | Role            |
+| ------------------- | --------------- |
+| `ada@example.com`   | `vehicle_owner` |
+| `grace@example.com` | `vehicle_owner` |
+| `linus@example.com` | `vehicle_owner` |
+| `raj@example.com`   | `garage_owner`  |
+| `mei@example.com`   | `garage_owner`  |
+| `sofia@example.com` | `garage_owner`  |
+
+### Authorization model
+
+The RLS policies never read `profiles.role`. Access is decided by ownership
+relations — `owns_vehicle()`, `owns_garage()`, `services_vehicle()` — which are
+facts in the data rather than a claim attached to the user. `role` exists only
+so the frontend knows which screens to show. A guarded page whose queries are
+not covered by RLS is a bug.
 
 ---
 
@@ -89,8 +148,12 @@ moment where the session is still being restored, and treating that as
 
 ### Roles
 
-Four roles, defined in `src/features/auth/roles.ts`: `owner`, `mechanic`,
-`station_manager`, `admin`.
+Two roles, defined in `src/features/auth/roles.ts`: `vehicle_owner` and
+`garage_owner`. These mirror the `user_role` enum in Postgres exactly — change
+one and you must change the other.
+
+There is no separate `mechanic` role: mechanics work under their garage owner's
+login, and who actually did the work is recorded on the service record instead.
 
 The role is read from the user's **`app_metadata`**, which only the server can
 write and which is embedded in the JWT — so the same value is available to
@@ -98,13 +161,17 @@ database policies via `auth.jwt() -> 'app_metadata' ->> 'role'`.
 
 Never read a role from `user_metadata`. Users can edit their own
 `user_metadata`, so a role stored there is a self-service permission upgrade.
+For the same reason, signup always creates a `vehicle_owner` — the role is
+deliberately not taken from the `signUp()` payload.
 
-To set a role while developing, in the Supabase SQL editor:
+To promote someone, use the helper the migration installs (service role only,
+it keeps the JWT claim and the `profiles` row in step):
 
 ```sql
-update auth.users
-set raw_app_meta_data = raw_app_meta_data || '{"role":"owner"}'::jsonb
-where email = 'you@example.com';
+select public.set_user_role(
+  (select id from auth.users where email = 'you@example.com'),
+  'garage_owner'
+);
 ```
 
 Sign out and back in for the new JWT to pick it up.
@@ -165,9 +232,11 @@ suggests the policy isn't doing its job — fix the policy instead.
 
 Deliberately left open, because they depend on decisions not yet made:
 
-- **Database schema and migrations.** No tables exist. `src/types/database.ts`
-  is a placeholder typed `any`; run `pnpm gen:types` once the schema lands and
-  the whole app gains type-safe queries.
-- **RLS policies.** Must be written alongside the schema, never after.
+- **Feature screens.** Every route under `src/app/router.tsx` renders a
+  `Placeholder`. The schema behind them exists, so they can be built against
+  real tables and real types.
 - **Testing.** No runner installed. Vitest + Testing Library is the natural fit.
 - **CI, deploy, error tracking.**
+- **TLS.** The Supabase VM is served over plain HTTP, so the anon key and every
+  login password cross the network in cleartext. Fine for local development,
+  not fine before real users.
