@@ -229,7 +229,19 @@ insert into public.reminders (vehicle_id, owner_id, type, trigger_type, due_date
   ('d0000000-0000-4000-a000-000000000005', 'a0000000-0000-4000-a000-000000000005',
    'emission_test', 'date', '2026-06-30', null, 'completed'),
   ('d0000000-0000-4000-a000-000000000005', 'a0000000-0000-4000-a000-000000000005',
-   'other', 'date', '2026-12-15', null, 'dismissed');
+   'other', 'date', '2026-12-15', null, 'dismissed'),
+  -- Two rows deliberately just short of due, so both transition paths can be
+  -- exercised without hand-editing data.
+  --
+  -- The Civic reads 21,850 miles, so one service record with an odometer over
+  -- 22,000 flips this via the service_records trigger.
+  ('d0000000-0000-4000-a000-000000000002', 'a0000000-0000-4000-a000-000000000001',
+   'service', 'mileage', null, 22000, 'scheduled'),
+  -- Relative, not a fixed date: this row has to still be "about to lapse"
+  -- whenever the seed is run, and a hard-coded date stops being that the day
+  -- after it is written. sweep_due_reminders() picks it up tomorrow.
+  ('d0000000-0000-4000-a000-000000000004', 'a0000000-0000-4000-a000-000000000005',
+   'service', 'date', current_date + 1, null, 'scheduled');
 
 insert into public.notifications (profile_id, type, title, body, ref_id, read) values
   ('a0000000-0000-4000-a000-000000000001', 'booking_confirmed',
