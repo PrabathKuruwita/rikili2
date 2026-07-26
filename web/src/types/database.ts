@@ -83,6 +83,41 @@ export type Database = {
           },
         ]
       }
+      garage_hours: {
+        Row: {
+          closes_at: string
+          created_at: string
+          garage_id: string
+          id: string
+          opens_at: string
+          weekday: number
+        }
+        Insert: {
+          closes_at: string
+          created_at?: string
+          garage_id: string
+          id?: string
+          opens_at: string
+          weekday: number
+        }
+        Update: {
+          closes_at?: string
+          created_at?: string
+          garage_id?: string
+          id?: string
+          opens_at?: string
+          weekday?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "garage_hours_garage_id_fkey"
+            columns: ["garage_id"]
+            isOneToOne: false
+            referencedRelation: "garages"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       garage_services: {
         Row: {
           created_at: string
@@ -500,6 +535,14 @@ export type Database = {
       booking_holds_bay: {
         Args: { s: Database["public"]["Enums"]["booking_status"] }
         Returns: boolean
+      }
+      garage_availability: {
+        Args: {
+          day: string
+          duration_minutes: number
+          target_garage_id: string
+        }
+        Returns: string[]
       }
       owns_garage: { Args: { target_garage_id: string }; Returns: boolean }
       owns_vehicle: { Args: { target_vehicle_id: string }; Returns: boolean }
