@@ -120,6 +120,29 @@ reading data and one-off inspection. If you do change schema there — including
 and run `supabase migration repair --status applied <version>` afterwards, or
 the next person to run `db:push` inherits the mess.
 
+### Scheduled jobs
+
+There is one background job in the database, registered with `pg_cron` by
+`20260726010000_reminder_transitions.sql`. It is worth knowing about, because
+nothing in this codebase calls it and nothing in the app will tell you it ran:
+
+| Job                     | Schedule           | Does                                              |
+| ----------------------- | ------------------ | ------------------------------------------------- |
+| `reminders-daily-sweep` | `15 3 * * *` (UTC) | `select public.sweep_due_reminders()` — moves date reminders that have come due from `scheduled` to `due` |
+
+```sql
+select * from cron.job;                                  -- is it registered
+select * from cron.job_run_details order by start_time desc limit 10;   -- did it run
+select public.sweep_due_reminders();                     -- run it by hand (returns rows moved)
+```
+
+The sweep is idempotent — it only matches `scheduled` rows — so running it by
+hand is safe. It is not executable by `anon` or `authenticated`: it runs as
+`security definer` over every user's reminders and has no `auth.uid()`.
+
+Mileage reminders need no schedule. They are evaluated by a trigger on
+`service_records`, the moment an odometer reading advances the vehicle.
+
 ### Seed accounts
 
 `supabase/seed.sql` deletes its own users first, so re-running it is safe. Every
