@@ -1,16 +1,33 @@
 import { createBrowserRouter, Navigate } from 'react-router-dom'
 import { RequireAuth, RequireRole } from './RequireAuth'
 import { AppLayout } from './AppLayout'
-import { Placeholder } from '@/components/Placeholder'
-import Dashboard from '@/pages/Dashboard'
 import LoginPage from '@/pages/LoginPage'
+import Onboarding from '@/pages/Onboarding'
+import Settings from '@/pages/Settings'
+// Vehicle owner
+import Dashboard from '@/pages/Dashboard'
+import AddVehicle from '@/pages/AddVehicle'
+import VehicleDetail from '@/pages/VehicleDetail'
+import ServiceHistory from '@/pages/ServiceHistory'
+import FindGarage from '@/pages/FindGarage'
+import PickSlot from '@/pages/PickSlot'
+import MyBookings from '@/pages/MyBookings'
+import RemindersPage from '@/pages/RemindersPage'
+// Garage owner
+import StationDashboard from '@/pages/StationDashboard'
+import BookingQueue from '@/pages/BookingQueue'
+import JobBoard from '@/pages/JobBoard'
+import LogWork from '@/pages/LogWork'
+import Customers from '@/pages/Customers'
+import StationReports from '@/pages/StationReports'
 
 /**
  * Route map for the whole app.
  *
- * Every screen below is a Placeholder on purpose — this is a scaffold. To build
- * one, swap the element for a real page component under src/pages/ and give it
- * a matching folder under src/features/ for its hooks and queries.
+ * RequireRole decides which half of the app a signed-in user can reach, but it
+ * is a UX convenience only — the real boundary is RLS. Every screen below
+ * queries through policies that scope rows to the caller, which is why the same
+ * bookings query serves an owner their bookings and a garage its queue.
  */
 export const router = createBrowserRouter([
   { path: '/login', element: <LoginPage /> },
@@ -23,23 +40,22 @@ export const router = createBrowserRouter([
         children: [
           { path: '/', element: <Navigate to="/garage" replace /> },
 
-          // Pick a role — shown when a signed-in user has no role assigned yet.
-          { path: '/onboarding', element: <Placeholder title="Choose your account type" /> },
+          // Shown when a signed-in user has no role in their token.
+          { path: '/onboarding', element: <Onboarding /> },
 
           // ---- Vehicle owner ----
           {
             element: <RequireRole allow={['vehicle_owner']} />,
             children: [
               { path: '/garage', element: <Dashboard /> },
-              { path: '/garage/:vehicleId', element: <Placeholder title="Vehicle Detail" /> },
-              {
-                path: '/garage/:vehicleId/history',
-                element: <Placeholder title="Service History" />,
-              },
-              { path: '/book', element: <Placeholder title="Find a Garage" /> },
-              { path: '/book/:stationId', element: <Placeholder title="Pick a Slot" /> },
-              { path: '/bookings', element: <Placeholder title="My Bookings" /> },
-              { path: '/reminders', element: <Placeholder title="Reminders" /> },
+              // Static before dynamic, so /garage/new is not read as a uuid.
+              { path: '/garage/new', element: <AddVehicle /> },
+              { path: '/garage/:vehicleId', element: <VehicleDetail /> },
+              { path: '/garage/:vehicleId/history', element: <ServiceHistory /> },
+              { path: '/book', element: <FindGarage /> },
+              { path: '/book/:stationId', element: <PickSlot /> },
+              { path: '/bookings', element: <MyBookings /> },
+              { path: '/reminders', element: <RemindersPage /> },
             ],
           },
 
@@ -49,20 +65,20 @@ export const router = createBrowserRouter([
           {
             element: <RequireRole allow={['garage_owner']} />,
             children: [
-              { path: '/station', element: <Placeholder title="Station Dashboard" /> },
-              { path: '/station/bookings', element: <Placeholder title="Booking Queue" /> },
-              { path: '/station/jobs', element: <Placeholder title="Job Board" /> },
-              { path: '/station/jobs/:jobId', element: <Placeholder title="Log Work Performed" /> },
-              { path: '/station/customers', element: <Placeholder title="Customers" /> },
-              { path: '/station/reports', element: <Placeholder title="Reports" /> },
+              { path: '/station', element: <StationDashboard /> },
+              { path: '/station/bookings', element: <BookingQueue /> },
+              { path: '/station/jobs', element: <JobBoard /> },
+              { path: '/station/jobs/:jobId', element: <LogWork /> },
+              { path: '/station/customers', element: <Customers /> },
+              { path: '/station/reports', element: <StationReports /> },
             ],
           },
 
-          { path: '/settings', element: <Placeholder title="Settings" /> },
+          { path: '/settings', element: <Settings /> },
         ],
       },
     ],
   },
 
-  { path: '*', element: <Placeholder title="Not found" /> },
+  { path: '*', element: <Navigate to="/" replace /> },
 ])
