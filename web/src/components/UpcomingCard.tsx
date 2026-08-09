@@ -20,7 +20,9 @@ export function UpcomingCard({ service }: UpcomingCardProps) {
             </div>
 
             <div className="min-w-0">
-              <h3 className="truncate text-sm font-semibold text-slate-950">{service.serviceName}</h3>
+              <h3 className="truncate text-sm font-semibold text-slate-950">
+                {service.serviceName}
+              </h3>
               <p className="mt-1 truncate text-xs text-slate-500">{service.workshop}</p>
               <p className="mt-3 text-xs font-medium text-slate-500">
                 {service.date} · {service.time}

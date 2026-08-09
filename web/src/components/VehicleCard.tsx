@@ -17,16 +17,29 @@ export function VehicleCard({ vehicle }: VehicleCardProps) {
   return (
     <motion.div whileHover={{ y: -8 }} transition={{ type: 'spring', stiffness: 250, damping: 22 }}>
       <Card className="overflow-hidden">
-        <div className={['relative h-52 overflow-hidden bg-gradient-to-br p-5', IMAGE_TONES[vehicle.tone]].join(' ')}>
+        <div
+          className={[
+            'relative h-52 overflow-hidden bg-gradient-to-br p-5',
+            IMAGE_TONES[vehicle.tone],
+          ].join(' ')}
+        >
           <div className="absolute inset-x-8 bottom-8 h-24 rounded-[2rem] bg-white/35 blur-2xl" />
           <HealthIndicator status={vehicle.status} />
 
           <div className="absolute left-4 top-4 rounded-full bg-white/80 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-700 shadow-sm">
-            {vehicle.status === 'green' ? 'Healthy' : vehicle.status === 'orange' ? 'Due soon' : 'Attention'}
+            {vehicle.status === 'green'
+              ? 'Healthy'
+              : vehicle.status === 'orange'
+                ? 'Due soon'
+                : 'Attention'}
           </div>
 
           <div className="absolute inset-x-10 bottom-8 h-20 rounded-[2rem] border border-white/60 bg-white/55 shadow-[0_16px_40px_rgba(15,23,42,0.14)] backdrop-blur">
-            <img src={vehicle.image} alt={vehicle.name} className="h-full w-full object-contain p-3 drop-shadow-[0_20px_20px_rgba(15,23,42,0.18)]" />
+            <img
+              src={vehicle.image}
+              alt={vehicle.name}
+              className="h-full w-full object-contain p-3 drop-shadow-[0_20px_20px_rgba(15,23,42,0.18)]"
+            />
           </div>
 
           <div className="absolute bottom-4 left-5 rounded-full border border-white/70 bg-white/75 px-3 py-1 text-xs font-semibold tracking-[0.18em] text-slate-700 shadow-sm">

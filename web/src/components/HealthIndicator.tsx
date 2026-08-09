@@ -16,7 +16,12 @@ const DOT_CLASSES: Record<HealthIndicatorProps['status'], string> = {
 
 export function HealthIndicator({ status }: HealthIndicatorProps) {
   return (
-    <div className={['absolute right-4 top-4 flex h-8 w-8 items-center justify-center rounded-full border-[3px] bg-white shadow-sm', STATUS_CLASSES[status]].join(' ')}>
+    <div
+      className={[
+        'absolute right-4 top-4 flex h-8 w-8 items-center justify-center rounded-full border-[3px] bg-white shadow-sm',
+        STATUS_CLASSES[status],
+      ].join(' ')}
+    >
       <span className={['h-2.5 w-2.5 rounded-full', DOT_CLASSES[status]].join(' ')} />
     </div>
   )

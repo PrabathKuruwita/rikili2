@@ -29,7 +29,12 @@ export function StatsCard({ label, value, detail, icon: Icon, accent }: StatsCar
             <p className="mt-3 text-3xl font-semibold tracking-tight text-slate-950">{value}</p>
           </div>
 
-          <div className={['grid h-11 w-11 place-items-center rounded-2xl bg-gradient-to-br shadow-sm', accentClasses].join(' ')}>
+          <div
+            className={[
+              'grid h-11 w-11 place-items-center rounded-2xl bg-gradient-to-br shadow-sm',
+              accentClasses,
+            ].join(' ')}
+          >
             <Icon className="h-5 w-5 text-white" />
           </div>
         </div>
