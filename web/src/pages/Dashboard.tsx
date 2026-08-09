@@ -17,16 +17,12 @@ const pageVariants = {
 
 export default function Dashboard() {
   return (
-    <motion.div
-      id="dashboard"
-      variants={pageVariants}
-      initial="hidden"
-      animate="show"
-      className="space-y-8"
-    >
+    <motion.div variants={pageVariants} initial="hidden" animate="show" className="space-y-8">
       <section className="flex flex-col gap-4 rounded-[1.5rem] border border-slate-200 bg-white p-6 shadow-[0_12px_40px_rgba(15,23,42,0.05)] sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <p className="text-sm font-medium uppercase tracking-[0.2em] text-slate-500">MyVehicle overview</p>
+          <p className="text-sm font-medium uppercase tracking-[0.2em] text-slate-500">
+            MyVehicle overview
+          </p>
           <h1 className="mt-2 text-3xl font-semibold tracking-tight text-slate-950 sm:text-4xl">
             Welcome back, Daniel
           </h1>
@@ -48,7 +44,10 @@ export default function Dashboard() {
         <div className="space-y-4">
           <div className="flex items-center justify-between gap-4">
             <h2 className="text-xl font-semibold tracking-tight text-slate-950">Your vehicles</h2>
-            <button type="button" className="text-sm font-semibold text-indigo-600 transition hover:text-indigo-500">
+            <button
+              type="button"
+              className="text-sm font-semibold text-indigo-600 transition hover:text-indigo-500"
+            >
               View all
             </button>
           </div>
@@ -61,10 +60,15 @@ export default function Dashboard() {
         </div>
 
         <aside className="space-y-6">
-          <section id="book-service" className="space-y-3 rounded-[1.5rem] border border-slate-200 bg-white p-5 shadow-[0_12px_40px_rgba(15,23,42,0.05)]">
+          <section className="space-y-3 rounded-[1.5rem] border border-slate-200 bg-white p-5 shadow-[0_12px_40px_rgba(15,23,42,0.05)]">
             <div className="flex items-center justify-between gap-3">
-              <h2 className="text-lg font-semibold tracking-tight text-slate-950">Upcoming Services</h2>
-              <button type="button" className="text-sm font-semibold text-indigo-600 transition hover:text-indigo-500">
+              <h2 className="text-lg font-semibold tracking-tight text-slate-950">
+                Upcoming Services
+              </h2>
+              <button
+                type="button"
+                className="text-sm font-semibold text-indigo-600 transition hover:text-indigo-500"
+              >
                 History
               </button>
             </div>
@@ -76,10 +80,13 @@ export default function Dashboard() {
             </div>
           </section>
 
-          <section id="reminders" className="space-y-3 rounded-[1.5rem] border border-slate-200 bg-white p-5 shadow-[0_12px_40px_rgba(15,23,42,0.05)]">
+          <section className="space-y-3 rounded-[1.5rem] border border-slate-200 bg-white p-5 shadow-[0_12px_40px_rgba(15,23,42,0.05)]">
             <div className="flex items-center justify-between gap-3">
               <h2 className="text-lg font-semibold tracking-tight text-slate-950">Reminders</h2>
-              <button type="button" className="text-sm font-semibold text-indigo-600 transition hover:text-indigo-500">
+              <button
+                type="button"
+                className="text-sm font-semibold text-indigo-600 transition hover:text-indigo-500"
+              >
                 All
               </button>
             </div>

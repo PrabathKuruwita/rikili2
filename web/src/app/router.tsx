@@ -2,7 +2,7 @@ import { createBrowserRouter, Navigate } from 'react-router-dom'
 import { RequireAuth, RequireRole } from './RequireAuth'
 import { AppLayout } from './AppLayout'
 import { Placeholder } from '@/components/Placeholder'
-import DashboardPage from '@/pages/DashboardPage'
+import Dashboard from '@/pages/Dashboard'
 import LoginPage from '@/pages/LoginPage'
 
 /**
@@ -30,7 +30,7 @@ export const router = createBrowserRouter([
           {
             element: <RequireRole allow={['vehicle_owner']} />,
             children: [
-              { path: '/garage', element: <DashboardPage /> },
+              { path: '/garage', element: <Dashboard /> },
               { path: '/garage/:vehicleId', element: <Placeholder title="Vehicle Detail" /> },
               {
                 path: '/garage/:vehicleId/history',

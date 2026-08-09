@@ -1,12 +1,13 @@
 import type { LucideIcon } from 'lucide-react'
-import { BellRing, CalendarDays, CarFront, Gauge, LayoutDashboard, ListChecks, Settings, Wrench } from 'lucide-react'
+import { BellRing, CalendarDays, CarFront, Gauge, Wrench } from 'lucide-react'
 
-export type NavItem = {
-  label: string
-  icon: LucideIcon
-  href: string
-  active?: boolean
-}
+/**
+ * Hardcoded content for the dashboard, standing in until the real queries land.
+ *
+ * Nothing here reflects the signed-in user. Replace each export with a React
+ * Query hook under src/features/ reading through src/lib/supabase — do not grow
+ * this file.
+ */
 
 export type StatItem = {
   label: string
@@ -40,21 +41,29 @@ export type ReminderItem = {
   description: string
 }
 
-export const navigationItems: NavItem[] = [
-  { label: 'Dashboard', icon: LayoutDashboard, href: '#dashboard', active: true },
-  { label: 'My Vehicles', icon: CarFront, href: '#vehicles' },
-  { label: 'Book Service', icon: Wrench, href: '#book-service' },
-  { label: 'Service Records', icon: ListChecks, href: '#service-records' },
-  { label: 'Reminders', icon: BellRing, href: '#reminders' },
-  { label: 'Reports', icon: Gauge, href: '#reports' },
-  { label: 'Settings', icon: Settings, href: '#settings' },
-]
-
 export const statistics: StatItem[] = [
   { label: 'Vehicles', value: '3', detail: 'In your garage', icon: CarFront, accent: 'indigo' },
-  { label: 'Average Health Score', value: '76%', detail: '+3% this week', icon: Gauge, accent: 'emerald' },
-  { label: 'Upcoming Services', value: '2', detail: 'Next 7 days', icon: CalendarDays, accent: 'sky' },
-  { label: 'Unread Reminders', value: '3', detail: 'Action needed', icon: BellRing, accent: 'amber' },
+  {
+    label: 'Average Health Score',
+    value: '76%',
+    detail: '+3% this week',
+    icon: Gauge,
+    accent: 'emerald',
+  },
+  {
+    label: 'Upcoming Services',
+    value: '2',
+    detail: 'Next 7 days',
+    icon: CalendarDays,
+    accent: 'sky',
+  },
+  {
+    label: 'Unread Reminders',
+    value: '3',
+    detail: 'Action needed',
+    icon: BellRing,
+    accent: 'amber',
+  },
 ]
 
 export const vehicles: VehicleItem[] = [
