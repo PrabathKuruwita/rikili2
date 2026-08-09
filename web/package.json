@@ -13,7 +13,8 @@
     "format:check": "prettier --check \"src/**/*.{ts,tsx,css}\"",
     "gen:types": "dotenv -e .env.local -- sh -c 'supabase gen types typescript --db-url \"$SUPABASE_DB_URL\"' > src/types/database.ts",
     "db:status": "dotenv -e .env.local -- sh -c 'supabase migration list --workdir .. --db-url \"$SUPABASE_DB_URL\"'",
-    "db:push": "dotenv -e .env.local -- sh -c 'supabase db push --workdir .. --db-url \"$SUPABASE_DB_URL\"'"
+    "db:push": "dotenv -e .env.local -- sh -c 'supabase db push --workdir .. --db-url \"$SUPABASE_DB_URL\"'",
+    "db:seed": "dotenv -e .env.local -- node scripts/seed.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.110.7",
@@ -27,11 +28,13 @@
   "devDependencies": {
     "@tailwindcss/vite": "^4.3.3",
     "@types/node": "^24.13.2",
+    "@types/pg": "^8.21.0",
     "@types/react": "^19.2.17",
     "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react": "^6.0.3",
     "dotenv-cli": "^11.0.0",
     "oxlint": "^1.71.0",
+    "pg": "^8.23.0",
     "prettier": "^3.9.6",
     "supabase": "^2.109.1",
     "tailwindcss": "^4.3.3",
