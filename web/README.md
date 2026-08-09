@@ -3,8 +3,10 @@
 React + TypeScript + Vite frontend, backed by Supabase. Serves both user types:
 vehicle owners and garage owners.
 
-Auth, routing, and the database schema work; every feature screen is still a
-placeholder waiting to be built.
+Every screen is built and reads live data through Supabase. Both sides of the
+product work end to end: an owner can add a vehicle, browse garages, book a
+slot, set reminders and back-fill history; a garage can work its queue, run the
+job board, log work performed, and see reports.
 
 ---
 
@@ -64,6 +66,7 @@ password and must stay out of the bundle. Never rename it with one.
 | `pnpm gen:types` | Regenerate `src/types/database.ts`      |
 | `pnpm db:status` | Compare local migrations to the remote  |
 | `pnpm db:push`   | Apply pending migrations to the remote  |
+| `pnpm db:seed`   | Load `supabase/seed.sql` (safe to re-run) |
 
 ---
 
@@ -122,17 +125,32 @@ the next person to run `db:push` inherits the mess.
 
 ### Seed accounts
 
-`supabase/seed.sql` deletes its own users first, so re-running it is safe. Every
-seed account uses the password **`rikili-dev-1234`**:
+Load it with `pnpm db:seed`. The seed deletes its own users first, so re-running
+it is safe and resets the dataset. Every seed account uses the password
+**`rikili-dev-1234`**:
 
-| Email               | Role            |
-| ------------------- | --------------- |
-| `ada@example.com`   | `vehicle_owner` |
-| `grace@example.com` | `vehicle_owner` |
-| `linus@example.com` | `vehicle_owner` |
-| `raj@example.com`   | `garage_owner`  |
-| `mei@example.com`   | `garage_owner`  |
-| `sofia@example.com` | `garage_owner`  |
+| Email               | Role            | What they have                       |
+| ------------------- | --------------- | ------------------------------------ |
+| `ada@example.com`   | `vehicle_owner` | 2 vehicles, a live job, reminders due |
+| `grace@example.com` | `vehicle_owner` | 1 vehicle, upcoming full service      |
+| `linus@example.com` | `vehicle_owner` | 2 vehicles, a no-show in history      |
+| `nia@example.com`   | `vehicle_owner` | 2 vehicles across three garages       |
+| `tomas@example.com` | `vehicle_owner` | 1 EV, service overdue                 |
+| `yuki@example.com`  | `vehicle_owner` | 1 EV, pending request                 |
+| `raj@example.com`   | `garage_owner`  | Patel Auto Works — 3 bays, busiest    |
+| `mei@example.com`   | `garage_owner`  | Chen Motors — 2 bays                  |
+| `sofia@example.com` | `garage_owner`  | Rossi Performance — 4 bays            |
+| `omar@example.com`  | `garage_owner`  | Haddad Tyre & Brake — 2 bays          |
+
+Every timestamp in the seed is relative to `now()`, so there is always work in
+the past, one job in progress, and bookings over the coming week — no matter
+when it is run. Hours are wall-clock time in `America/New_York`, where the
+seeded garages are.
+
+`pnpm db:seed` runs `scripts/seed.mjs` rather than the supabase CLI: `supabase
+db query -f` sends a file as a single prepared statement, and Postgres rejects
+multiple commands in one. The seed is a single transaction, so a failure leaves
+nothing behind.
 
 ### Authorization model
 
@@ -152,7 +170,14 @@ src/
   components/   Shared presentational components
   features/     One folder per domain area. Hooks, queries, and logic live
                 here, next to the thing they serve.
-    auth/       Session state, roles, useAuth()
+    auth/           Session state, roles, useAuth()
+    bookings/       Booking queries, status transitions, labels
+    garages/        Garage catalog, own garage, service offerings
+    notifications/  Notification list and read flags
+    profile/        Own profile, and a garage's customers
+    records/        Service history, logging work, manual back-fill
+    reminders/      Reminders and their due-date/mileage labels
+    vehicles/       Vehicles and derived health
   lib/          Cross-cutting infrastructure (supabase client, env)
   pages/        One component per route. Composes from features/.
   types/        Generated database types
@@ -227,7 +252,7 @@ table the whole internet can read.
 
 ## Adding a screen
 
-1. Find the route in `src/app/router.tsx` — it's currently a `<Placeholder />`.
+1. Add the route in `src/app/router.tsx`, under the right `<RequireRole>`.
 2. Create the page in `src/pages/`.
 3. Put its data fetching in a hook under `src/features/<area>/`.
 4. Swap the router element for your page.
@@ -241,19 +266,18 @@ import { supabase } from '@/lib/supabase'
 
 export function useVehicles() {
   return useQuery({
-    queryKey: ['vehicles'],
-    queryFn: async () => {
-      const { data, error } = await supabase.from('vehicles').select('*')
-      if (error) throw error // supabase-js resolves on error — you must throw
-      return data
-    },
+    queryKey: vehicleKeys.all,
+    queryFn: async () => unwrap(await supabase.from('vehicles').select('*')),
   })
 }
 ```
 
-That `if (error) throw error` line is not optional boilerplate. `supabase-js`
-returns errors in the resolved value rather than rejecting, so without the
-throw a failed query looks to React Query like a successful empty result.
+`unwrap` (in `src/lib/query.ts`) is not optional ceremony. `supabase-js` returns
+errors in the resolved value rather than rejecting, so without a check a failed
+query looks to React Query like a successful empty result — a denied request
+renders as "no vehicles" instead of an error. Every query in this app goes
+through it. Use `unwrapMaybe` only where no row is a legitimate answer
+(`maybeSingle()`).
 
 Note there is no `where user_id = ...` filter. With RLS in place the database
 already scopes rows to the caller. Filtering in the client on top of that
@@ -303,9 +327,16 @@ frontend that depends on it is fine; the reverse is a broken `main`.
 
 Deliberately left open, because they depend on decisions not yet made:
 
-- **Feature screens.** Every route under `src/app/router.tsx` renders a
-  `Placeholder`. The schema behind them exists, so they can be built against
-  real tables and real types.
+- **Availability up front.** `PickSlot` submits and reports what the database
+  says, because a customer may only read their own bookings — the browser
+  cannot know which bays are free without leaking another customer's schedule.
+  A garage-hours + availability RPC is in flight on
+  `vidur/garage-hours-availability-rpc`; that is what makes a real slot picker
+  possible.
+- **Opening hours.** `PickSlot` assumes 08:00–18:00 for everyone. There is no
+  hours table yet — same branch.
+- **Notifications are read-only.** Nothing writes them; the seed inserts them
+  directly. They want a trigger or an Edge Function.
 - **Testing.** No runner installed. Vitest + Testing Library is the natural fit.
 - **CI, deploy, error tracking.**
 - **TLS.** The Supabase VM is served over plain HTTP, so the anon key and every

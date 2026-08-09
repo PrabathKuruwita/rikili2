@@ -24,13 +24,20 @@ begin;
 
 -- Readable slot arithmetic. pg_temp is dropped when the session ends, so this
 -- helper never becomes part of the schema.
+--
+-- Hours are wall-clock time in America/New_York, where every seeded garage is.
+-- Anchoring to the server clock instead would make `hour => 9` mean 09:00 UTC,
+-- which renders as a 5am appointment to anyone on the US east coast — the seed
+-- would look broken for the addresses it ships with.
 create function pg_temp.slot(days int, hour int, minute int default 0)
 returns timestamptz
 language sql
 stable
 as $$
-  select date_trunc('day', now())
-       + make_interval(days => days, hours => hour, mins => minute);
+  select (
+    date_trunc('day', now() at time zone 'America/New_York')
+    + make_interval(days => days, hours => hour, mins => minute)
+  ) at time zone 'America/New_York';
 $$;
 
 delete from auth.users where email in (
