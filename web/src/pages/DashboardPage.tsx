@@ -3,7 +3,7 @@ export default function DashboardPage() {
     <div className="space-y-8">
       <section className="flex flex-col gap-4 rounded-[1.5rem] border border-slate-200 bg-white p-6 shadow-[0_12px_40px_rgba(15,23,42,0.05)] sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <p className="text-sm font-medium uppercase tracking-[0.2em] text-slate-500">MyVehicle overview</p>
+          <p className="text-sm font-medium uppercase tracking-[0.2em] text-slate-500">Garaje overview</p>
           <h1 className="mt-2 text-3xl font-semibold tracking-tight text-slate-950 sm:text-4xl">
             Welcome back, Daniel
           </h1>

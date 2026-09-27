@@ -1,0 +1,12 @@
+<svg width="640" height="360" viewBox="0 0 640 360" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="640" height="360" rx="28" fill="#E5E7EB"/>
+  <rect x="60" y="88" width="520" height="212" rx="22" fill="#F8FAFC" stroke="#CBD5E1"/>
+  <rect x="82" y="118" width="186" height="130" rx="14" fill="#FFFFFF" stroke="#D1D5DB"/>
+  <rect x="108" y="142" width="134" height="14" rx="7" fill="#BFDBFE"/>
+  <rect x="108" y="168" width="104" height="14" rx="7" fill="#BFDBFE"/>
+  <rect x="340" y="128" width="170" height="92" rx="14" fill="#DBEAFE" stroke="#BFDBFE"/>
+  <rect x="360" y="148" width="128" height="12" rx="6" fill="#3B82F6"/>
+  <rect x="360" y="168" width="86" height="12" rx="6" fill="#93C5FD"/>
+  <rect x="82" y="254" width="476" height="18" rx="9" fill="#CBD5E1"/>
+  <text x="320" y="78" text-anchor="middle" font-family="Inter, Arial, sans-serif" font-size="22" font-weight="700" fill="#0F172A">Bay Area Motorworks</text>
+</svg>

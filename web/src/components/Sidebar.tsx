@@ -3,7 +3,11 @@ import { ChevronRight } from 'lucide-react'
 import { navigationItems } from '@/data/vehicles'
 import { Badge } from '@/components/ui/badge'
 
-export function Sidebar() {
+type SidebarProps = {
+  activeHash: string
+}
+
+export function Sidebar({ activeHash }: SidebarProps) {
   return (
     <aside className="border-b border-slate-200 bg-white lg:fixed lg:inset-y-0 lg:left-0 lg:w-80 lg:border-b-0 lg:border-r">
       <div className="flex h-full flex-col px-5 py-6">
@@ -12,7 +16,7 @@ export function Sidebar() {
             <span className="text-sm font-bold">M</span>
           </div>
           <div>
-            <p className="text-lg font-semibold tracking-tight text-slate-950">MyVehicle</p>
+            <p className="text-lg font-semibold tracking-tight text-slate-950">Garaje</p>
             <p className="text-sm text-slate-500">Vehicle Management</p>
           </div>
         </div>
@@ -29,16 +33,16 @@ export function Sidebar() {
                 whileTap={{ scale: 0.98 }}
                 className={[
                   'flex items-center justify-between rounded-2xl px-4 py-3 text-sm font-medium transition-all duration-200',
-                  item.active
+                  activeHash === item.href
                     ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-600/20'
                     : 'text-slate-600 hover:bg-slate-100 hover:text-slate-950',
                 ].join(' ')}
               >
                 <span className="flex items-center gap-3">
-                  <Icon className={['h-4 w-4', item.active ? 'text-white' : 'text-slate-400'].join(' ')} />
+                  <Icon className={['h-4 w-4', activeHash === item.href ? 'text-white' : 'text-slate-400'].join(' ')} />
                   {item.label}
                 </span>
-                {item.active ? <ChevronRight className="h-4 w-4 text-white/80" /> : null}
+                {activeHash === item.href ? <ChevronRight className="h-4 w-4 text-white/80" /> : null}
               </motion.a>
             )
           })}

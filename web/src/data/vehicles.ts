@@ -5,7 +5,6 @@ export type NavItem = {
   label: string
   icon: LucideIcon
   href: string
-  active?: boolean
 }
 
 export type StatItem = {
@@ -21,6 +20,8 @@ export type VehicleItem = {
   model: string
   mileage: string
   serviceDue: string
+  nextService: string
+  color: string
   status: 'green' | 'orange' | 'red'
   plate: string
   tone: 'indigo' | 'sky' | 'rose'
@@ -41,7 +42,7 @@ export type ReminderItem = {
 }
 
 export const navigationItems: NavItem[] = [
-  { label: 'Dashboard', icon: LayoutDashboard, href: '#dashboard', active: true },
+  { label: 'Dashboard', icon: LayoutDashboard, href: '#dashboard' },
   { label: 'My Vehicles', icon: CarFront, href: '#vehicles' },
   { label: 'Book Service', icon: Wrench, href: '#book-service' },
   { label: 'Service Records', icon: ListChecks, href: '#service-records' },
@@ -62,31 +63,37 @@ export const vehicles: VehicleItem[] = [
     name: 'Tesla Model 3',
     model: '2022 Tesla Model 3',
     mileage: '34,210 mi',
-    serviceDue: 'Service due Aug 12',
+    serviceDue: 'Service due Aug 12, 2026',
+    nextService: 'Aug 12, 2026',
+    color: 'Midnight Silver',
     status: 'green',
     plate: '8YKA221',
     tone: 'indigo',
-    image: '/vehicles/tesla-model-3.svg',
+    image: '/vehicles/tesla-model-3.jpg',
   },
   {
     name: 'Toyota RAV4',
     model: '2020 Toyota RAV4',
     mileage: '68,940 mi',
-    serviceDue: 'Service due Jul 28',
+    serviceDue: 'Service due Jul 28, 2026',
+    nextService: 'Jul 28, 2026',
+    color: 'Blueprint',
     status: 'orange',
     plate: '4TRB910',
     tone: 'sky',
-    image: '/vehicles/toyota-rav4.svg',
+    image: '/vehicles/toyota-rav4.jpg',
   },
   {
     name: 'Ford F-150',
     model: '2019 Ford F-150',
-    mileage: '91,300 mi',
-    serviceDue: 'Brake inspection due soon',
+    mileage: '102,300 mi',
+    serviceDue: 'Service due Jul 19, 2026',
+    nextService: 'Jul 19, 2026',
+    color: 'Oxford White',
     status: 'red',
     plate: '2LMC554',
     tone: 'rose',
-    image: '/vehicles/ford-f150.svg',
+    image: '/vehicles/ford-f150.jpg',
   },
 ]
 
